@@ -129,10 +129,7 @@ export function resolveSidebarItems (page, regularPath, site, localePath) {
     return resolveHeaders(page)
   }
   if (pageSidebarConfig === 'wiki') {
-    return [
-      ...resolveHeaders(page),
-      resolveBrothers(page, pages)
-    ]
+    return resolveCategoryTree(page.path, pages)
   }
 
   const sidebarConfig = localeConfig.sidebar || themeConfig.sidebar
@@ -167,42 +164,101 @@ function resolveHeaders (page) {
   }]
 }
 
-function resolveBrothers (page, pages) {
-  console.log(page)
-  const parentPath = resolveParentPath(page.regularPath)
-  pages.map(p => {
-    return {
-      type: 'page',
-      path: p.path,
-      title: p.title
+function resolveCategoryTree (path, pages) {
+  const mainDir = resolveMainCategory(path)
+  if (mainDir == null) {
+    return []
+  }
+  const categoryTree = {}
+  const reveiwedPageKeys = []
+  pages.forEach(p => {
+    if ((new RegExp('^' + mainDir + '.*$')).test(p.path)) {
+      if (reveiwedPageKeys.indexOf(p.key) === -1) {
+        reveiwedPageKeys.push(p.key)
+        const dirs = resolveDirPath(p.path).split('/').slice(1, -1)
+        let parent = categoryTree
+        dirs.forEach(d => {
+          if (parent.dirs == null) { parent.dirs = {} }
+          if (parent.dirs[d] == null) { parent.dirs[d] = {} }
+          parent = parent.dirs[d]
+        })
+        if (p.path[p.path.length - 1] === '/') {
+          parent.page = p
+        } else {
+          if (parent.pages == null) { parent.pages = [] }
+          parent.pages.push(p)
+        }
+      }
     }
   })
-  return {
-    type: 'group',
-    collapsable: false,
-    title: 'Pages on same path',
-    path: null,
-    children: pages.filter(p => {
-      return (
-        new RegExp('^' + parentPath + '([^\/]+(\/|(\\\.html)))?$')
-      ).test(p.path)
-    }).map(p => {
-      return {
-        type: 'page',
-        path: p.path,
-        title: p.title
+  const tree = treeLinks(categoryTree.dirs)
+  return tree
+}
+
+function treeLinks (tree) {
+  const keys = Object.keys(tree)
+  const links = []
+  keys.forEach(key => {
+    const node = {}
+    if (tree[key].dirs != null) {
+      node.type = 'group'
+      node.collapsable = false
+      if (tree[key].page) {
+        node.title = tree[key].page.title || key
+        node.path = tree[key].page.path
+      } else {
+        node.title = key
+        node.path = null
       }
-    })
+      node.children = treeLinks(tree[key].dirs)
+    } else {
+      node.type = 'page'
+      if (tree[key].page) {
+        node.title = tree[key].page.title || key
+        node.path = tree[key].page.path
+      } else {
+        node.path = null
+      }
+    }
+
+    if (tree[key].pages != null) {
+      node.type = 'group'
+      if (node.children == null) { node.children = [] }
+      tree[key].pages.forEach(p => {
+        node.children.push({
+          type: 'page',
+          path: p.path,
+          title: p.title
+        })
+      })
+    }
+    links.push(node)
+  })
+  return links
+}
+
+function resolveMainCategory (path) {
+  const dirs = path.split('/')
+  if (dirs.length > 2) {
+    return '/' + dirs[1] + '/'
   }
+  return null
 }
 
 export function resolveParentPath (path) {
-  console.log(path)
-  return (path[path.length - 1] === '/') ? path : path.replace(/[^\/]+(\.html)$/, '')
+  if (path[path.length - 1] === '/') {
+    return nodePath.dirname(path.slice(0, -1)) + '/'
+  } else {
+    return nodePath.dirname(path) + '/'
+  }
 }
 
-export function resolveParentPath2 (path) {
-  return nodePath.dirname(path)
+export function resolveDirPath (path) {
+  if (path[path.length - 1] === '/') {
+    return path
+  } else {
+    return nodePath.dirname(path) + '/'
+  }
 }
 
 export function groupHeaders (headers) {
