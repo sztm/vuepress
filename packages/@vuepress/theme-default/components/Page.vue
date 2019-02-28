@@ -5,20 +5,20 @@
     <Content class="theme-default-content" />
     <PageEdit />
 
-    <PageNav v-bind="{ sidebarItems }" />
+    <PageNav v-bind="{sidebarItems}" />
 
     <slot name="bottom" />
   </main>
 </template>
 
 <script>
-import PageEdit from '@theme/components/PageEdit.vue'
-import PageNav from '@theme/components/PageNav.vue'
+import PageEdit from "@theme/components/PageEdit.vue";
+import PageNav from "@theme/components/PageNav.vue";
 
 export default {
-  components: { PageEdit, PageNav },
-  props: ['sidebarItems']
-}
+  components: {PageEdit, PageNav},
+  props: ["sidebarItems"]
+};
 </script>
 
 <style lang="stylus">
@@ -27,5 +27,4 @@ export default {
 .page
   padding-bottom 2rem
   display block
-
 </style>
