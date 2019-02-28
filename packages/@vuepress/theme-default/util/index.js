@@ -1,3 +1,5 @@
+import nodePath from 'path'
+
 export const hashRE = /#.*$/
 export const extRE = /\.(md|html)$/
 export const endingSlashRE = /\/$/
@@ -126,6 +128,12 @@ export function resolveSidebarItems (page, regularPath, site, localePath) {
   if (pageSidebarConfig === 'auto') {
     return resolveHeaders(page)
   }
+  if (pageSidebarConfig === 'wiki') {
+    return [
+      ...resolveHeaders(page),
+      resolveBrothers(page, pages)
+    ]
+  }
 
   const sidebarConfig = localeConfig.sidebar || themeConfig.sidebar
   if (!sidebarConfig) {
@@ -157,6 +165,44 @@ function resolveHeaders (page) {
       children: h.children || []
     }))
   }]
+}
+
+function resolveBrothers (page, pages) {
+  console.log(page)
+  const parentPath = resolveParentPath(page.regularPath)
+  pages.map(p => {
+    return {
+      type: 'page',
+      path: p.path,
+      title: p.title
+    }
+  })
+  return {
+    type: 'group',
+    collapsable: false,
+    title: 'Pages on same path',
+    path: null,
+    children: pages.filter(p => {
+      return (
+        new RegExp('^' + parentPath + '([^\/]+(\/|(\\\.html)))?$')
+      ).test(p.path)
+    }).map(p => {
+      return {
+        type: 'page',
+        path: p.path,
+        title: p.title
+      }
+    })
+  }
+}
+
+export function resolveParentPath (path) {
+  console.log(path)
+  return (path[path.length - 1] === '/') ? path : path.replace(/[^\/]+(\.html)$/, '')
+}
+
+export function resolveParentPath2 (path) {
+  return nodePath.dirname(path)
 }
 
 export function groupHeaders (headers) {
