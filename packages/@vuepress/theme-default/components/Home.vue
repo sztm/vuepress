@@ -93,7 +93,7 @@ export default {
     text-align center
     img
       max-width: 100%
-      max-height 280px
+      max-height 240px
       display block
       margin 3rem auto 1.5rem
     h1
@@ -158,7 +158,7 @@ export default {
     padding-right 1.5rem
     .hero
       img
-        max-height 210px
+        max-height 180px
         margin 2rem auto 1.2rem
       h1
         font-size 2rem
