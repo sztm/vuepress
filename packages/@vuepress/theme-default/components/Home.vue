@@ -130,6 +130,7 @@ export default {
     flex-grow 1
     flex-basis 30%
     max-width 30%
+    box-sizing border-box
     h2
       font-size 1.4rem
       font-weight 500
@@ -149,8 +150,10 @@ export default {
     .features
       flex-direction column
     .feature
-      max-width 100%
+      max-width 90%
+      width 80%
       padding 0 2.5rem
+      margin 0.5rem auto
 
 @media (max-width: $MQMobileNarrow)
   .home
@@ -170,6 +173,7 @@ export default {
         font-size 1rem
         padding 0.6rem 1.2rem
     .feature
+      width 90%
       h2
         font-size 1.25rem
 </style>
