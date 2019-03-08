@@ -224,6 +224,7 @@ function treeLinks (tree) {
         node.path = tree[key].page.path
       } else {
         node.path = null
+        node.title = key
       }
     }
 
