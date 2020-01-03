@@ -175,30 +175,42 @@ function resolveCategoryTree (path, pages) {
   if (mainDir == null) {
     return []
   }
-  const categoryTree = {}
-  const reveiwedPageKeys = []
-  pages.forEach(p => {
-    if ((new RegExp('^' + mainDir + '.*$')).test(p.path)) {
-      if (reveiwedPageKeys.indexOf(p.key) === -1) {
-        reveiwedPageKeys.push(p.key)
-        const dirs = resolveDirPath(p.path).split('/').slice(1, -1)
-        let parent = categoryTree
-        dirs.forEach(d => {
-          if (parent.dirs == null) { parent.dirs = {} }
-          if (parent.dirs[d] == null) { parent.dirs[d] = {} }
-          parent = parent.dirs[d]
-        })
-        if (p.path[p.path.length - 1] === '/') {
-          parent.page = p
-        } else {
-          if (parent.pages == null) { parent.pages = [] }
-          parent.pages.push(p)
+  const categoryTree = {};
+  const reveiwedPageKeys = [];
+  pages
+    .sort((a, b) => {
+      return a.title > b.title ? 1 : -1;
+    })
+    .forEach(p => {
+      if (new RegExp("^" + mainDir + ".*$").test(p.path)) {
+        if (reveiwedPageKeys.indexOf(p.key) === -1) {
+          reveiwedPageKeys.push(p.key);
+          const dirs = resolveDirPath(p.path)
+            .split("/")
+            .slice(1, -1);
+          let parent = categoryTree;
+          dirs.forEach(d => {
+            if (parent.dirs == null) {
+              parent.dirs = {};
+            }
+            if (parent.dirs[d] == null) {
+              parent.dirs[d] = {};
+            }
+            parent = parent.dirs[d];
+          });
+          if (p.path[p.path.length - 1] === "/") {
+            parent.page = p;
+          } else {
+            if (parent.pages == null) {
+              parent.pages = [];
+            }
+            parent.pages.push(p);
+          }
         }
       }
-    }
-  })
-  const tree = treeLinks(categoryTree.dirs)
-  return tree
+    });
+  const tree = treeLinks(categoryTree.dirs);
+  return tree;
 }
 
 function treeLinks (tree) {
